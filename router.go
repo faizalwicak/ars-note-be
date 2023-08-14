@@ -29,17 +29,23 @@ func SetupRouter() *gin.Engine {
 	authorized.DELETE("/book/:bookId", server.DeleteBook)
 	authorized.PUT("/book/:bookId", server.EditBook)
 
-	authorized.POST("/book/:bookId/categories", server.CreateCategory)
-	authorized.GET("/book/:bookId/categories", server.ListCategory)
+	authorized.POST("/categories", server.CreateCategory)
+	authorized.GET("/categories", server.ListCategory)
 	authorized.GET("/category/:categoryId", server.GetCategory)
 	authorized.PUT("/category/:categoryId", server.EditCategory)
 	authorized.DELETE("/category/:categoryId", server.DeleteCategory)
 
-	authorized.POST("/book/:bookId/locations", server.CreateLocation)
-	authorized.GET("/book/:bookId/locations", server.ListLocation)
+	authorized.POST("/locations", server.CreateLocation)
+	authorized.GET("/locations", server.ListLocation)
 	authorized.GET("/location/:locationId", server.GetLocation)
 	authorized.PUT("/location/:locationId", server.EditLocation)
 	authorized.DELETE("/location/:locationId", server.DeleteLocation)
+
+	authorized.POST("/transactions", server.CreateTransaction)
+	// authorized.GET("/locations", server.ListLocation)
+	// authorized.GET("/location/:locationId", server.GetLocation)
+	// authorized.PUT("/location/:locationId", server.EditLocation)
+	// authorized.DELETE("/location/:locationId", server.DeleteLocation)
 
 	// authorized.GET("/groceries", server.GetGroceries)
 	// authorized.POST("/grocery", server.PostGrocery)

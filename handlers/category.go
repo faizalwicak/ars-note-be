@@ -9,6 +9,11 @@ import (
 )
 
 type CategoryInput struct {
+	Name   string `json:"name" binding:"required"`
+	BookId int    `json:"book_id" binding:"required"`
+}
+
+type CategoryEdit struct {
 	Name string `json:"name" binding:"required"`
 }
 
@@ -20,21 +25,15 @@ func (s *Server) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	bookId := c.Param("bookId")
-	var book models.Book
-	if err := s.db.Where("id = ?", bookId).First(&book).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
 	user, err := utils.CurrentUser(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
+	var book models.Book
+	if err := s.db.Where("id = ? and user_id = ?", categoryInput.BookId, user.ID).First(&book).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -49,10 +48,10 @@ func (s *Server) CreateCategory(c *gin.Context) {
 }
 
 func (s *Server) ListCategory(c *gin.Context) {
-	bookId := c.Param("bookId")
-	var book models.Book
-	if err := s.db.Preload("Categories").Where("id = ?", bookId).First(&book).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	bookId, valid := c.GetQuery("book")
+
+	if !valid {
+		c.JSON(http.StatusNotFound, gin.H{"error": "record not found"})
 		return
 	}
 
@@ -62,8 +61,9 @@ func (s *Server) ListCategory(c *gin.Context) {
 		return
 	}
 
-	if book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
+	var book models.Book
+	if err := s.db.Preload("Categories").Where("id = ? and user_id = ?", bookId, user.ID).First(&book).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -80,13 +80,8 @@ func (s *Server) GetCategory(c *gin.Context) {
 
 	categoryId := c.Param("categoryId")
 	var category models.Category
-	if err := s.db.Preload("Book").Where("id = ?", categoryId).First(&category).Error; err != nil {
+	if err := s.db.Joins("Book").Where("categories.id = ? and book.user_id = ?", categoryId, user.ID).First(&category).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	if category.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
 		return
 	}
 
@@ -95,9 +90,8 @@ func (s *Server) GetCategory(c *gin.Context) {
 
 func (s *Server) EditCategory(c *gin.Context) {
 
-	var categoryInput CategoryInput
-
-	if err := c.ShouldBindJSON(&categoryInput); err != nil {
+	var categoryEdit CategoryEdit
+	if err := c.ShouldBindJSON(&categoryEdit); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -110,17 +104,12 @@ func (s *Server) EditCategory(c *gin.Context) {
 
 	categoryId := c.Param("categoryId")
 	var category models.Category
-	if err := s.db.Preload("Book").Where("id = ?", categoryId).First(&category).Error; err != nil {
+	if err := s.db.Joins("Book").Where("categories.id = ? and book.user_id = ?", categoryId, user.ID).First(&category).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	if category.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
-		return
-	}
-
-	category.Name = categoryInput.Name
+	category.Name = categoryEdit.Name
 	s.db.Save(&category)
 
 	c.JSON(http.StatusOK, category)
@@ -136,13 +125,8 @@ func (s *Server) DeleteCategory(c *gin.Context) {
 
 	categoryId := c.Param("categoryId")
 	var category models.Category
-	if err := s.db.Preload("Book").Where("id = ?", categoryId).First(&category).Error; err != nil {
+	if err := s.db.Joins("Book").Where("categories.id = ? and book.user_id = ?", categoryId, user.ID).First(&category).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	if category.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
 		return
 	}
 

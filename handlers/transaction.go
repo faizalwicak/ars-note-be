@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/faizalwicak/ars-note-be/models"
 	"github.com/faizalwicak/ars-note-be/utils"
@@ -9,7 +10,13 @@ import (
 )
 
 type TransactionInput struct {
-	Name string `json:"name" binding:"required"`
+	Name        string    `json:"name" binding:"required"`
+	Date        time.Time `json:"date" binding:"required" time_format:"2006-01-01" time_utc:"1"`
+	Value       int       `json:"value" binding:"required"`
+	Description string    `json:"description"`
+	BookId      uint
+	LocationId  uint
+	CategoryId  uint
 }
 
 func (s *Server) CreateTransaction(c *gin.Context) {
@@ -70,86 +77,86 @@ func (s *Server) ListTransaction(c *gin.Context) {
 	c.JSON(http.StatusOK, book.Transactions)
 }
 
-func (s *Server) GetTransaction(c *gin.Context) {
+// func (s *Server) GetTransaction(c *gin.Context) {
 
-	user, err := utils.CurrentUser(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	user, err := utils.CurrentUser(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	TransactionId := c.Param("transactionId")
-	var Transaction models.Transaction
-	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+// 	TransactionId := c.Param("transactionId")
+// 	var Transaction models.Transaction
+// 	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	if Transaction.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
-		return
-	}
+// 	if Transaction.Book.UserId != user.ID {
+// 		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, Transaction)
-}
+// 	c.JSON(http.StatusOK, Transaction)
+// }
 
-func (s *Server) EditTransaction(c *gin.Context) {
+// func (s *Server) EditTransaction(c *gin.Context) {
 
-	var TransactionInput TransactionInput
+// 	var TransactionInput TransactionInput
 
-	if err := c.ShouldBindJSON(&TransactionInput); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	if err := c.ShouldBindJSON(&TransactionInput); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	user, err := utils.CurrentUser(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	user, err := utils.CurrentUser(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	TransactionId := c.Param("transactionId")
-	var Transaction models.Transaction
-	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+// 	TransactionId := c.Param("transactionId")
+// 	var Transaction models.Transaction
+// 	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	if Transaction.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
-		return
-	}
+// 	if Transaction.Book.UserId != user.ID {
+// 		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
+// 		return
+// 	}
 
-	Transaction.Name = TransactionInput.Name
-	s.db.Save(&Transaction)
+// 	Transaction.Name = TransactionInput.Name
+// 	s.db.Save(&Transaction)
 
-	c.JSON(http.StatusOK, Transaction)
-}
+// 	c.JSON(http.StatusOK, Transaction)
+// }
 
-func (s *Server) DeleteTransaction(c *gin.Context) {
+// func (s *Server) DeleteTransaction(c *gin.Context) {
 
-	user, err := utils.CurrentUser(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	user, err := utils.CurrentUser(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	TransactionId := c.Param("TransactionId")
-	var Transaction models.Transaction
-	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+// 	TransactionId := c.Param("TransactionId")
+// 	var Transaction models.Transaction
+// 	if err := s.db.Preload("Book").Where("id = ?", TransactionId).First(&Transaction).Error; err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	if Transaction.Book.UserId != user.ID {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
-		return
-	}
+// 	if Transaction.Book.UserId != user.ID {
+// 		c.JSON(http.StatusForbidden, gin.H{"error": "You not allowed to access this book"})
+// 		return
+// 	}
 
-	if err := s.db.Delete(&Transaction).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
+// 	if err := s.db.Delete(&Transaction).Error; err != nil {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	c.Status(http.StatusNoContent)
-}
+// 	c.Status(http.StatusNoContent)
+// }

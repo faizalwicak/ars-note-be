@@ -6,19 +6,20 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func Setup() (*gorm.DB, error) {
 
 	dsn := os.Getenv("DATABASE_URL")
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	if err = db.AutoMigrate(&User{}, &Grocery{}, &Book{}, &Category{}, &Location{}, &Transaction{}); err != nil {
-		log.Println(err)
-	}
+	db.AutoMigrate(&User{}, &Grocery{}, &Book{}, &Category{}, &Location{}, &Transaction{})
 
 	return db, err
 }

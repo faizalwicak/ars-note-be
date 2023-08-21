@@ -6,8 +6,8 @@ import (
 
 type Book struct {
 	gorm.Model
-	Name         string
-	UserId       uint
+	Name         string `json:"name"`
+	UserId       uint   `json:"user_id"`
 	Categories   []Category
 	Locations    []Location
 	Transactions []Transaction

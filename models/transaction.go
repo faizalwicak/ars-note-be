@@ -8,11 +8,14 @@ import (
 
 type Transaction struct {
 	gorm.Model
-	Name        string    `json:"Name"`
-	Date        time.Time `json:"Date"`
-	Value       int       `json:"Value"`
-	Description string    `gorm:"type:text" json:"Description"`
-	BookId      uint
-	LocationId  uint
-	CategoryId  uint
+	Date        time.Time `json:"date"`
+	Value       int       `json:"value"`
+	Description string    `json:"description" gorm:"type:text"`
+	BookId      uint      `json:"book_id"`
+	LocationId  *uint     `json:"location_id" gorm:"default:null"`
+	CategoryId  *uint     `json:"category_id" gorm:"default:null"`
+
+	Book     Book     `json:"-"`
+	Location Location `json:"-"`
+	Category Category `json:"-"`
 }

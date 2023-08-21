@@ -6,8 +6,8 @@ import (
 
 type Category struct {
 	gorm.Model
-	Name         string `json:"Name"`
-	BookId       uint
-	Book         Book `json:"-"`
+	Name         string `json:"name"`
+	BookId       uint   `json:"book_id"`
+	Book         Book   `json:"-"`
 	Transactions []Transaction
 }

@@ -47,8 +47,5 @@ func SetupRouter() *gin.Engine {
 	authorized.PUT("/transaction/:transactionId", server.EditTransaction)
 	authorized.DELETE("/transaction/:transactionId", server.DeleteTransaction)
 
-	// authorized.GET("/groceries", server.GetGroceries)
-	// authorized.POST("/grocery", server.PostGrocery)
-
 	return r
 }

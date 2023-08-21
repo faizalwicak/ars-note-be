@@ -19,7 +19,7 @@ func Setup() (*gorm.DB, error) {
 		log.Fatal(err.Error())
 	}
 
-	db.AutoMigrate(&User{}, &Grocery{}, &Book{}, &Category{}, &Location{}, &Transaction{})
+	db.AutoMigrate(&User{}, &Book{}, &Category{}, &Location{}, &Transaction{})
 
 	return db, err
 }
